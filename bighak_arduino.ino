@@ -14,7 +14,7 @@ const int RCMax = 1550;  //absolute max: 2003; //max microseconds
 const int RCMin = 1350;  //absalute min: 986; //min microseconds 
 const int RCEnable = 1700; //cut in level
 const int RCDisable = 1200; //cut out level
-bool LaserOn;
+boolean LaserOn;
 double LeftSignal=1500, RightSignal=1500, EnableSignal=1500, LaserSignal=1500;
 float LeftMotorSpeed, RightMotorSpeed;
 
