@@ -15,11 +15,16 @@ const int RCMin = 1350;  //absalute min: 986; //min microseconds
 const int RCEnable = 1700; //cut in level
 const int RCDisable = 1200; //cut out level
 boolean LaserOn;
+char Command;
 double LeftSignal=1500, RightSignal=1500, EnableSignal=1500, LaserSignal=1500;
 float LeftMotorSpeed, RightMotorSpeed;
 
+
 void setup() {
-          
+  Serial.begin(9600); 
+  while (!Serial) {
+    ; // wait for serial port to connect. Supposedly Needed for Leonardo only
+  }
   pinMode(LeftMotorOutPin, OUTPUT);
   pinMode(RightMotorOutPin, OUTPUT);
   pinMode(LaserOutPin, OUTPUT);
@@ -53,10 +58,47 @@ void loop(){
       RightMotorSpeed = map(RightSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
     } else {
       //auto stuff
-    }
+      //get next charachter
+      if (Serial.available() > 0) {
+        Command = Serial.read();
+      }
+      //set outputs correctly
+      //select case
+      switch (Command) {
+        case 'F':        //F=forward
+          LaserOn=false;
+          LeftMotorSpeed = MotorMaxFWD;
+          RightMotorSpeed = MotorMaxFWD;
+        case 'B':        //B=backward
+          LaserOn=false;
+          LeftMotorSpeed = MotorMaxREV;
+          RightMotorSpeed = MotorMaxREV;
+        case 'S':        //S=stop
+          LaserOn=false;
+          LeftMotorSpeed = MotorNeutral;
+          RightMotorSpeed = MotorNeutral;
+        case 'L':        //L=rotate left
+          LaserOn=false;
+          LeftMotorSpeed = MotorMaxREV;
+          RightMotorSpeed = MotorMaxFWD;
+        case 'R':         //R=rotate right
+          LaserOn=false;
+          LeftMotorSpeed = MotorMaxFWD;
+          RightMotorSpeed = MotorMaxREV;
+        case 'Z':        //Z=fire laser
+          LaserOn=true;
+          LeftMotorSpeed = MotorNeutral;
+          RightMotorSpeed = MotorNeutral;
+        case 'z':        //z=turn laser off
+          LaserOn=false;
+          LeftMotorSpeed = MotorNeutral;
+          RightMotorSpeed = MotorNeutral;
+     }///end switch
+   }//end auto
   } else {
     // Enable Signal Pulse timed out or low - we have to assume RC has gone away
     // set everything to neutral
+    LaserOn=false;
     LeftMotorSpeed = MotorNeutral;
     RightMotorSpeed = MotorNeutral;
    Serial.println("**** Enable Signal lost****");
