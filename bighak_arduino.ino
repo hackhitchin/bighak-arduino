@@ -1,5 +1,5 @@
-const int FwdRCPin = 5; //radio control input pin 'elevator', used for forward/reverse
-const int SteerRCPin = 6; //radio control input pin, 'aileron', used for steering
+const int LeftRCPin = 5; //radio control input pin 'elevator', used for forward/reverse
+const int RightRCPin = 6; //radio control input pin, 'aileron', used for steering
 const int EnableRCPin = 7; //radio control input pin,'throttle' used to decide when to override the 
 const int LaserRCPin = 4; //radio control input pin,, should be 'rudder'
 const int LeftMotorOutPin = 3; //output to opamp to generate motor controller voltages
@@ -13,13 +13,7 @@ const int RCMax = 1550;  //absolute max: 2003; //max microseconds
 const int RCMin = 1350;  //absalute min: 986; //min microseconds 
 const int RCEnable = 1700; //cut in level
 const int RCDisable = 1200; //cut out level
-// variables to keep track of RC signals. 'rising_times' are used to track when signal pusles started. '_Signal' variables used to store last received pulse length
-unsigned long risingFWDTime = 0;
-unsigned long risingSteeringTime = 0;
-unsigned long risingEnableTime = 0;
-unsigned long risingLaserTime = 0;
-double FWDSignal=1500, SteeringSignal=1500, EnableSignal=1500, LaserSignal=1500;
-int LeftMotorSignal, RightMotorSignal; //used to store desired motor speeds
+double LeftSignal=1500, RightSignal=1500, EnableSignal=1500, LaserSignal=1500;
 float LeftMotorSpeed, RightMotorSpeed;
 
 void setup() {
@@ -28,8 +22,8 @@ void setup() {
   pinMode(RightMotorOutPin, OUTPUT);
   pinMode(LaserOutPin, OUTPUT);
   pinMode(ControllerEnablePin, OUTPUT);
-  pinMode(FwdRCPin,INPUT);
-  pinMode(SteerRCPin,INPUT);
+  pinMode(LeftRCPin,INPUT);
+  pinMode(RightRCPin,INPUT);
   pinMode(EnableRCPin,INPUT);
   pinMode(LaserRCPin,INPUT);
   digitalWrite(ControllerEnablePin,LOW);
@@ -45,19 +39,15 @@ void loop(){
   EnableSignal = pulseIn(EnableRCPin, HIGH, 25000);
   if (EnableSignal > 0){
     
-    FWDSignal = pulseIn(FwdRCPin, HIGH, 25000); // Read the pulse width of 
-    SteeringSignal = pulseIn(SteerRCPin, HIGH, 25000); // each channel
+    LeftSignal = pulseIn(LeftRCPin, HIGH, 25000); // Read the pulse width of 
+    RightSignal = pulseIn(RightRCPin, HIGH, 25000); // each channel
     // constrain signals
     
-    FWDSignal = constrain(FWDSignal, RCMin, RCMax);
-    SteeringSignal = constrain(SteeringSignal, RCMin, RCMax);
+    LeftSignal = constrain(LeftSignal, RCMin, RCMax);
+    RightSignal = constrain(RightSignal, RCMin, RCMax);
   
-    // todo: check for enable channel level
-    LeftMotorSignal = FWDSignal; // mixing: FWDSignal+SteeringSignal-3000; //RC signal midpoint assumed 1500, this makes motorspeed value +/-1000
-    RightMotorSignal = SteeringSignal; //mixing: FWDSignal-SteeringSignal-3000;
-  
-    LeftMotorSpeed = map(LeftMotorSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
-    RightMotorSpeed = map(RightMotorSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
+    LeftMotorSpeed = map(LeftSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
+    RightMotorSpeed = map(RightSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
   } else {
     // Enable Signal Pulse timed out - we have to assume RC has gone away
     // set everything to neutral
