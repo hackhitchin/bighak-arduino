@@ -5,6 +5,7 @@ const int LaserRCPin = 4; //radio control input pin,, should be 'rudder'
 const int LeftMotorOutPin = 3; //output to opamp to generate motor controller voltages
 const int RightMotorOutPin =11; //output to opamp to generate motor controller voltages
 const int LaserOutPin = 8; //output to relay to fire laser
+const int RCSwitchPin = 12; //needs comfirming, this is the lien connected to the physical toggle switch for RC
 const int ControllerEnablePin = 2; //output to relay for turning controller on  
 const int MotorNeutral = 133; //pwm level for motors off
 const int MotorMaxFWD = 194;  //185 equivalent to 3.62
@@ -13,6 +14,7 @@ const int RCMax = 1550;  //absolute max: 2003; //max microseconds
 const int RCMin = 1350;  //absalute min: 986; //min microseconds 
 const int RCEnable = 1700; //cut in level
 const int RCDisable = 1200; //cut out level
+bool LaserOn;
 double LeftSignal=1500, RightSignal=1500, EnableSignal=1500, LaserSignal=1500;
 float LeftMotorSpeed, RightMotorSpeed;
 
@@ -26,6 +28,7 @@ void setup() {
   pinMode(RightRCPin,INPUT);
   pinMode(EnableRCPin,INPUT);
   pinMode(LaserRCPin,INPUT);
+  pinMode(RCSwitchPin,INPUT);
   digitalWrite(ControllerEnablePin,LOW);
   analogWrite(LeftMotorOutPin,MotorNeutral);
   analogWrite(RightMotorOutPin,MotorNeutral);
@@ -37,31 +40,35 @@ void setup() {
 void loop(){
 // channel fitlering. TODO: check for invalid, or outof range values and do something
   EnableSignal = pulseIn(EnableRCPin, HIGH, 25000);
-  if (EnableSignal > 0){
+  if (EnableSignal > 1500){
+    if (digitalRead(RCSwitchPin)){
+      LeftSignal = pulseIn(LeftRCPin, HIGH, 25000); // Read the pulse width of 
+      RightSignal = pulseIn(RightRCPin, HIGH, 25000); // each channel
+      // constrain signals
     
-    LeftSignal = pulseIn(LeftRCPin, HIGH, 25000); // Read the pulse width of 
-    RightSignal = pulseIn(RightRCPin, HIGH, 25000); // each channel
-    // constrain signals
-    
-    LeftSignal = constrain(LeftSignal, RCMin, RCMax);
-    RightSignal = constrain(RightSignal, RCMin, RCMax);
+      LeftSignal = constrain(LeftSignal, RCMin, RCMax);
+      RightSignal = constrain(RightSignal, RCMin, RCMax);
   
-    LeftMotorSpeed = map(LeftSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
-    RightMotorSpeed = map(RightSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
+      LeftMotorSpeed = map(LeftSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
+      RightMotorSpeed = map(RightSignal, RCMin, RCMax, MotorMaxFWD, MotorMaxREV);
+    } else {
+      //auto stuff
+    }
   } else {
-    // Enable Signal Pulse timed out - we have to assume RC has gone away
+    // Enable Signal Pulse timed out or low - we have to assume RC has gone away
     // set everything to neutral
     LeftMotorSpeed = MotorNeutral;
     RightMotorSpeed = MotorNeutral;
    Serial.println("**** Enable Signal lost****");
   }
 
-//debugging
+  //debugging
   analogWrite(LeftMotorOutPin,LeftMotorSpeed);
   analogWrite(RightMotorOutPin,RightMotorSpeed);
+  digitalWrite(LaserOutPin, LaserOn);
   Serial.print("left = " );                       
-  Serial.print(LeftMotorSignal);   
+  Serial.print(LeftSignal);   
   Serial.print("right = " );                       
-  Serial.println(RightMotorSignal);  
+  Serial.println(RightSignal);  
   delay(20);
 }
