@@ -12,9 +12,9 @@ const int CONTROLLER_ENABLE_PIN = 2; //output to relay for turning controller on
 const int LASER_OUT_PIN = 8; //output to relay to fire laser
 
 // PWM levels
-const int MotorNeutral = 133; //pwm level for motors off
-const int MotorMaxFWD = 194;  //185 equivalent to 3.62
-const int MotorMaxREV = 79;   //80 equivalent to 1.56V
+const int MOTOR_NEUTRAL = 133; //pwm level for motors off
+const int MOTOR_MAX_FWD = 194;  //185 equivalent to 3.62
+const int MOTOR_MAX_REV = 79;   //80 equivalent to 1.56V
 
 // RC Pulsewidths
 const int RC_MAX_WIDTH = 1550;  //absolute max: 2003; //max microseconds 
@@ -56,8 +56,8 @@ void setup() {
   pinMode(RC_LASER_PIN,INPUT);
   pinMode(RC_SWITCH_PIN,INPUT_PULLUP);
   digitalWrite(CONTROLLER_ENABLE_PIN,LOW);
-  analogWrite(MOTOR_LEFT_OUT_PIN,MotorNeutral);
-  analogWrite(MOTOR_RIGHT_OUT_PIN,MotorNeutral);
+  analogWrite(MOTOR_LEFT_OUT_PIN,MOTOR_NEUTRAL);
+  analogWrite(MOTOR_RIGHT_OUT_PIN,MOTOR_NEUTRAL);
   delay(3000);
   digitalWrite(CONTROLLER_ENABLE_PIN,HIGH);
   delay(1000);  
@@ -81,8 +81,8 @@ void loop(){
       else {
         LaserOn=false;
       }
-      LeftMotorSpeed = map(LeftSignal, RC_MIN_WIDTH, RC_MAX_WIDTH, MotorMaxFWD, MotorMaxREV);
-      RightMotorSpeed = map(RightSignal, RC_MIN_WIDTH, RC_MAX_WIDTH, MotorMaxFWD, MotorMaxREV);
+      LeftMotorSpeed = map(LeftSignal, RC_MIN_WIDTH, RC_MAX_WIDTH, MOTOR_MAX_FWD, MOTOR_MAX_REV);
+      RightMotorSpeed = map(RightSignal, RC_MIN_WIDTH, RC_MAX_WIDTH, MOTOR_MAX_FWD, MOTOR_MAX_REV);
     } 
     else {
       //get next character
@@ -102,8 +102,8 @@ void loop(){
           if((millis()-LastCommand) > RC_COMMS_TIMEOUT){  
           //if its been a while - turn everything off
             LaserOn=false;
-            LeftMotorSpeed = MotorNeutral;
-            RightMotorSpeed = MotorNeutral;
+            LeftMotorSpeed = MOTOR_NEUTRAL;
+            RightMotorSpeed = MOTOR_NEUTRAL;
           }
         }
       }
@@ -112,38 +112,38 @@ void loop(){
       switch (Command) { // grab first character only, as ther may have been multiple chars in buffer
         case FWD:        //F=forward
           LaserOn=false;
-          LeftMotorSpeed = MotorMaxFWD;
-          RightMotorSpeed = MotorMaxFWD;
+          LeftMotorSpeed = MOTOR_MAX_FWD;
+          RightMotorSpeed = MOTOR_MAX_FWD;
           break;
         case BACK:        //B=backward
           LaserOn=false;
-          LeftMotorSpeed = MotorMaxREV;
-          RightMotorSpeed = MotorMaxREV;
+          LeftMotorSpeed = MOTOR_MAX_REV;
+          RightMotorSpeed = MOTOR_MAX_REV;
           break;
         case STOP:        //S=stop
           LaserOn=false;
-          LeftMotorSpeed = MotorNeutral;
-          RightMotorSpeed = MotorNeutral;
+          LeftMotorSpeed = MOTOR_NEUTRAL;
+          RightMotorSpeed = MOTOR_NEUTRAL;
           break;
         case LEFT:        //L=rotate left
           LaserOn=false;
-          LeftMotorSpeed = MotorMaxREV;
-          RightMotorSpeed = MotorMaxFWD;
+          LeftMotorSpeed = MOTOR_MAX_REV;
+          RightMotorSpeed = MOTOR_MAX_FWD;
           break;
         case RIGHT:         //R=rotate right
           LaserOn=false;
-          LeftMotorSpeed = MotorMaxFWD;
-          RightMotorSpeed = MotorMaxREV;
+          LeftMotorSpeed = MOTOR_MAX_FWD;
+          RightMotorSpeed = MOTOR_MAX_REV;
           break;
         case PEW:        //Z=fire laser
           LaserOn=true;
-          LeftMotorSpeed = MotorNeutral;
-          RightMotorSpeed = MotorNeutral;
+          LeftMotorSpeed = MOTOR_NEUTRAL;
+          RightMotorSpeed = MOTOR_NEUTRAL;
           break;
         case PEW_STOP:        //z=turn laser off
           LaserOn=false;
-          LeftMotorSpeed = MotorNeutral;
-          RightMotorSpeed = MotorNeutral;
+          LeftMotorSpeed = MOTOR_NEUTRAL;
+          RightMotorSpeed = MOTOR_NEUTRAL;
           break;
       }
     }
@@ -152,8 +152,8 @@ void loop(){
     // Enable Signal Pulse timed out or low - we have to assume RC has gone away
     // set everything to neutral
     LaserOn=false;
-    LeftMotorSpeed = MotorNeutral;
-    RightMotorSpeed = MotorNeutral;
+    LeftMotorSpeed = MOTOR_NEUTRAL;
+    RightMotorSpeed = MOTOR_NEUTRAL;
     if (DEBUG == true){
       Serial.println("**** Enable Signal lost****");
     }
@@ -185,5 +185,4 @@ void loop(){
     Serial.println(RightSignal);  
   }
 }
-
 
