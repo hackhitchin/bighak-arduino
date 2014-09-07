@@ -21,7 +21,7 @@ const int RC_MAX_WIDTH = 1550;  //absolute max: 2003; //max microseconds
 const int RC_MIN_WIDTH = 1350;  //absalute min: 986; //min microseconds 
 const int RC_ENABLE_WIDTH = 1700; //cut in level
 const int RC_DISABLE_WIDTH = 1200; //cut out level
-const int RC_COMMS_TIMEOUT = 2000; // Time since last command
+const int RC_COMMS_TIMEOUT = 2005; // Time since last command
 
 // Direction constants
 const char FWD = 'F';
@@ -169,7 +169,7 @@ void loop(){
   //debugging
   if (DEBUG == true){
 
-    if (!digitalRead(RC_SWITCH_PIN)){
+    if (digitalRead(RC_SWITCH_PIN) == LOW){
       Serial.print("RC on, " );
     } 
     else {
